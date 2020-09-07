@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!-- xlsx.js (C) 2013-present  SheetJS http://sheetjs.com -->
+<!-- vim: set ts=2: -->
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="script-src 'self' https:"
+    />
+    <title>Fatura MEGA para Factura 21</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <h1>Fatura MEGA para Factura 21</h1>
+
+    <p>
+      Escolher ficheiro Excel (.xlsx) dado pelo MEGA:<br />
+      <input type="file" name="xlfile" id="readIn" />
+    </p>
+
+    <p>
+      <input
+        type="submit"
+        value="Importar para o Factura 21"
+        id="exportBtn"
+        disabled="true"
+      />
+      <br />
+      Após clicar no botão, tem 10 segundos para ir para o Factura 21 BackOffice
+      e selecionar a célula para introduzir referência do produto (Clientes ->
+      Factura -> Linhas)
+    </p>
+    <div>
+      <button id="cancelExportBtn" style="display: none">Cancelar</button>
+    </div>
+    <p id="countdown"></p>
+    <hr />
+    <p>
+      <button id="fetchDataBtn">Ver dados dos livros</button>
+    </p>
+    <table>
+      <tr>
+        <th>Nome</th>
+        <th>ISBN</th>
+        <th>Qnt</th>
+        <th>Preço</th>
+        <th></th>
+      </tr>
+      <tbody id="dataTableBody"></tbody>
+    </table>
+    <script src="main.js"></script>
+  </body>
+</html>
