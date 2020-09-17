@@ -52,9 +52,8 @@ ipcMain.on("handle-paste-cancel", () => {
   cancelPaste = true;
 });
 
-ipcMain.on("handle-paste", (event, arg) => {
+ipcMain.on("handle-paste", (event, data, prices) => {
   setTimeout(async () => {
-    const data = arg;
     robotjs.setKeyboardDelay(1);
     for (const isbn of Object.keys(data)) {
       if (cancelPaste) {
@@ -65,6 +64,7 @@ ipcMain.on("handle-paste", (event, arg) => {
       robotjs.keyTap("tab");
       await sleep(100);
       robotjs.keyTap("tab");
+      if (prices[isbn]) robotjs.typeStringDelayed(`${prices[isbn]}`, 6000);
       robotjs.keyTap("tab");
       robotjs.typeStringDelayed(data[isbn], 6000);
       robotjs.keyTap("tab");

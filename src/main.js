@@ -4,6 +4,7 @@ const { ipcRenderer } = require("electron");
 const axios = require("axios");
 
 let content = {};
+const prices = {};
 
 const WOOK_REGEX = /<script type="application\/ld\+json">[^]*?({[^]+})[^]*?<\/script>[^]*?<!-- Fim Google/;
 
@@ -54,7 +55,7 @@ const startCountdown = async (args) => {
     await sleep(1000);
   }
   COUNTDOWN.innerText = "";
-  ipcRenderer.send("handle-paste", args);
+  ipcRenderer.send("handle-paste", args, prices);
   cancelExportBtn.style.display = "block";
 };
 
@@ -78,15 +79,18 @@ const fetchData = async function () {
     const response = await axios.get(`https://www.wook.pt/pesquisa/${isbn}`);
     const dataString = WOOK_REGEX.exec(response.data)?.[1] || "{}";
     const bookMetadata = JSON.parse(dataString);
+    const price = bookMetadata.offers && bookMetadata.offers.price;
+    if (price) prices[isbn] = price;
     tableBody.insertAdjacentHTML(
       "beforeend",
       `<tr>
-    <td>${bookMetadata.name}</td>
+    <td>${
+      bookMetadata.name ||
+      `<span styles="color: red;">Livro não encontrado</span>`
+    }</td>
     <td>${isbn}</td>
     <td>${qnt}</td>
-    <td>${
-      (bookMetadata.offers && bookMetadata.offers.price) || "--"
-    }&nbsp;€</td>
+    <td>${price || "--"}&nbsp;€</td>
     <td><button id="start-middle-${isbn}">Começar daqui</button></td>
     </tr>`
     );
