@@ -17,7 +17,7 @@ jobs:
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v2
         with:
-          node-version: 10
+          node-version: 16
 
       - name: Build/release Electron app
         uses: stinodes/action-electron-forge@0ee2b6d164c3bebf197b8096b7d51673e4b10631
