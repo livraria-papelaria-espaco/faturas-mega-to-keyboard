@@ -1,22 +1,13 @@
-/* xlsx.js (C) 2013-present SheetJS -- https://sheetjs.com */
-const XLSX = require("xlsx");
-const { ipcRenderer } = require("electron");
-const axios = require("axios");
-
 let content = {};
 const prices = {};
 
-const WOOK_REGEX = /<script type="application\/ld\+json">[^]*?({[^]+})[^]*?<\/script>[^]*?<!-- Fim Google/;
+const WOOK_REGEX = /<script type="application\/ld\+json">([^]+?)<\/script>/;
 
-const processWb = function (wb) {
+const processWb = async function (data) {
   const XPORT = document.getElementById("exportBtn");
 
-  const worksheet = wb.Sheets[wb.SheetNames[0]];
-  const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  const isbns = await window.electronAPI.readISBNListFromSpreadsheet(data);
 
-  const isbns = jsonData
-    .filter((v) => v.ISBN)
-    .map((v) => v.ISBN.replace(/-/g, ""));
   const occurrences = {};
   for (var i = 0; i < isbns.length; i++)
     occurrences[isbns[i]] = (occurrences[isbns[i]] || 0) + 1;
@@ -30,8 +21,7 @@ const readFile = function (files) {
   const reader = new FileReader();
   reader.onload = function (e) {
     let data = e.target.result;
-    data = new Uint8Array(data);
-    processWb(XLSX.read(data, { type: "array" }));
+    processWb(new Uint8Array(data));
   };
   reader.readAsArrayBuffer(f);
 };
@@ -41,12 +31,8 @@ const sleep = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const exportXlsx = () => startCountdown(content);
 
 const cancelExport = () => {
-  ipcRenderer.send("handle-paste-cancel");
+  window.electronAPI.cancelPaste();
 };
-
-ipcRenderer.on("paste-finished", () => {
-  cancelExportBtn.style.display = "none";
-});
 
 const startCountdown = async (args) => {
   const COUNTDOWN = document.getElementById("countdown");
@@ -55,8 +41,9 @@ const startCountdown = async (args) => {
     await sleep(1000);
   }
   COUNTDOWN.innerText = "";
-  ipcRenderer.send("handle-paste", args, prices);
   cancelExportBtn.style.display = "block";
+  await window.electronAPI.startPaste(args, prices);
+  cancelExportBtn.style.display = "none";
 };
 
 const handleMiddleExport = (isbn) => () => {
@@ -76,8 +63,8 @@ const fetchData = async function () {
 
   for (const isbn of Object.keys(content)) {
     const qnt = content[isbn];
-    const response = await axios.get(`https://www.wook.pt/pesquisa/${isbn}`);
-    const dataString = WOOK_REGEX.exec(response.data)?.[1] || "{}";
+    const data = await window.electronAPI.getBookFromWook(isbn);
+    const dataString = WOOK_REGEX.exec(data || "")?.[1] || "{}";
     const bookMetadata = JSON.parse(dataString);
     const price = bookMetadata.offers && bookMetadata.offers.price;
     if (price) prices[isbn] = price;
@@ -116,3 +103,8 @@ readIn.addEventListener(
 exportBtn.addEventListener("click", exportXlsx, false);
 fetchDataBtn.addEventListener("click", fetchData, false);
 cancelExportBtn.addEventListener("click", cancelExport, false);
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const version = await window.electronAPI.getAppVersion();
+  document.getElementById("app-version").innerText = version;
+});
