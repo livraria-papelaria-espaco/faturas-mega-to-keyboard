@@ -1,7 +1,7 @@
 {
   "name": "faturas-mega-to-keyboard",
   "productName": "faturas-mega-to-keyboard",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Parse MEGA excel files and type them into Factura 21",
   "main": "src/index.js",
   "scripts": {
@@ -28,6 +28,7 @@
     "@electron-forge/maker-deb": "^6.0.0",
     "@electron-forge/maker-squirrel": "^6.0.0",
     "@electron-forge/maker-zip": "^6.0.0",
+    "@electron-forge/publisher-github": "^6.0.0",
     "electron": "21.2.2"
   }
 }
