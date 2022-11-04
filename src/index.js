@@ -1,6 +1,9 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
-const robotjs = require("robotjs");
+const { keyboard, Key } = require("@nut-tree/nut-js");
+/* xlsx.js (C) 2013-present SheetJS -- https://sheetjs.com */
+const XLSX = require("xlsx");
+const axios = require("axios");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -12,7 +15,7 @@ const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     webPreferences: {
-      nodeIntegration: true,
+      preload: path.join(__dirname, "preload.js"),
     },
     width: 800,
     height: 600,
@@ -48,33 +51,57 @@ app.on("activate", () => {
 
 let cancelPaste = false;
 
-ipcMain.on("handle-paste-cancel", () => {
+ipcMain.on("cancelPaste", () => {
   cancelPaste = true;
 });
 
-ipcMain.on("handle-paste", (event, data, prices) => {
-  setTimeout(async () => {
-    robotjs.setKeyboardDelay(1);
-    for (const isbn of Object.keys(data)) {
-      if (cancelPaste) {
-        cancelPaste = false;
-        break;
-      }
-      robotjs.typeStringDelayed(isbn, 6000);
-      robotjs.keyTap("tab");
-      await sleep(100);
-      robotjs.keyTap("tab");
-      if (prices[isbn]) robotjs.typeStringDelayed(`${prices[isbn]}`, 6000);
-      robotjs.keyTap("tab");
-      robotjs.typeStringDelayed(data[isbn], 6000);
-      robotjs.keyTap("tab");
-      robotjs.keyTap("tab");
-      robotjs.keyTap("tab");
-      robotjs.keyTap("tab");
-      await sleep(250);
+ipcMain.handle("startPaste", async (event, data, prices) => {
+  cancelPaste = false;
+  keyboard.config.autoDelayMs = 1;
+  for (const isbn of Object.keys(data)) {
+    if (cancelPaste) {
+      break;
     }
-    event.sender.send("paste-finished");
-  });
+    await keyboard.type(isbn);
+    await keyboard.type(Key.Tab);
+    await sleep(100);
+    await keyboard.type(Key.Tab);
+    if (prices[isbn]) {
+      await keyboard.type(`${prices[isbn]}`);
+    }
+    await keyboard.type(Key.Tab);
+    await keyboard.type(`${data[isbn]}`);
+    await keyboard.type(Key.Tab);
+    await keyboard.type(Key.Tab);
+    await keyboard.type(Key.Tab);
+    await keyboard.type(Key.Tab);
+    await sleep(250);
+  }
+});
+
+ipcMain.handle("parseSpreadsheet", (event, data) => {
+  const wb = XLSX.read(data, { type: "array" });
+  const worksheet = wb.Sheets[wb.SheetNames[0]];
+  const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+  const isbns = jsonData
+    .filter((v) => v.ISBN)
+    .map((v) => v.ISBN.replace(/-/g, ""));
+
+  return isbns;
+});
+
+ipcMain.handle("getBookFromWook", async (event, isbn) => {
+  try {
+    const { data } = await axios.get(`https://www.wook.pt/pesquisa/${isbn}`);
+    return data;
+  } catch (e) {
+    return false;
+  }
+});
+
+ipcMain.handle("getAppVersion", (event) => {
+  return app.getVersion();
 });
 
 // In this file you can include the rest of your app's specific main process
