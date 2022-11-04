@@ -30,6 +30,6 @@ jobs:
         # If the commit is tagged with a version (e.g. "v1.0.0"),
         # release the app after building
         if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-        run: yarn
+        run: yarn run publish
         env:
           GITHUB_TOKEN: ${{ github.token }}
