@@ -63,9 +63,7 @@ const fetchData = async function () {
 
   for (const isbn of Object.keys(content)) {
     const qnt = content[isbn];
-    const data = await window.electronAPI.getBookFromWook(isbn);
-    const dataString = WOOK_REGEX.exec(data || "")?.[1] || "{}";
-    const bookMetadata = JSON.parse(dataString);
+    const bookMetadata = await window.electronAPI.getBookFromWook(isbn);
     const price = bookMetadata.offers && bookMetadata.offers.price;
     if (price) prices[isbn] = price;
     tableBody.insertAdjacentHTML(
