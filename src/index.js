@@ -93,7 +93,7 @@ ipcMain.handle("parseSpreadsheet", (event, data) => {
 
 ipcMain.handle("getBookFromWook", async (event, isbn) => {
   try {
-    const { data } = await axios.get(`https://www.wook.pt/pesquisa/${isbn}`);
+    const { data } = await axios.get(`https://book-api.diogotc.com/wook/info-by-isbn/${isbn}`);
     return data;
   } catch (e) {
     return false;
