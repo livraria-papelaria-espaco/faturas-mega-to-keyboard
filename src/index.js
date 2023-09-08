@@ -64,7 +64,7 @@ ipcMain.handle("startPaste", async (event, data, prices) => {
     }
     await keyboard.type(isbn);
     await keyboard.type(Key.Tab);
-    await sleep(100);
+    await sleep(500);
     await keyboard.type(Key.Tab);
     if (prices[isbn]) {
       await keyboard.type(`${prices[isbn]}`);
@@ -75,7 +75,7 @@ ipcMain.handle("startPaste", async (event, data, prices) => {
     await keyboard.type(Key.Tab);
     await keyboard.type(Key.Tab);
     await keyboard.type(Key.Tab);
-    await sleep(250);
+    await sleep(500);
   }
 });
 
