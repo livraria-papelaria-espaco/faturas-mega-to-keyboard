@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
-const { keyboard, Key } = require("@nut-tree/nut-js");
+const { keyboard, Key } = require("@nut-tree-fork/nut-js");
 /* xlsx.js (C) 2013-present SheetJS -- https://sheetjs.com */
 const XLSX = require("xlsx");
 const axios = require("axios");
