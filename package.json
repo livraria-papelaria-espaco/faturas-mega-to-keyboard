@@ -1,7 +1,7 @@
 {
   "name": "faturas-mega-to-keyboard",
   "productName": "faturas-mega-to-keyboard",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "Parse MEGA excel files and type them into Factura 21",
   "main": "src/index.js",
   "scripts": {
